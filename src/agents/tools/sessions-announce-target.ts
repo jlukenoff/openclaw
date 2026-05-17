@@ -14,11 +14,31 @@ async function callGatewayLazy<T = unknown>(opts: CallGatewayOptions): Promise<T
 export async function resolveAnnounceTarget(params: {
   sessionKey: string;
   displayKey: string;
+  /** Requester session key — used to extract :thread: suffix when available. */
+  requesterSessionKey?: string;
+  /** Explicit thread ID from the requester's current message context. */
+  requesterThreadId?: string | number;
 }): Promise<AnnounceTarget | null> {
   const parsed = resolveAnnounceTargetFromKey(params.sessionKey);
   const parsedDisplay = resolveAnnounceTargetFromKey(params.displayKey);
   const fallback = parsed ?? parsedDisplay ?? null;
+  // Prefer the requester's thread when available — this ensures replies
+  // from sessions_send stay in the originating thread instead of leaking
+  // to the target session's main channel.
+  //
+  // requesterThreadId (from the calling agent's message context) is the
+  // most reliable source: session keys only encode thread info when the
+  // session is thread-scoped, but the orchestrator commonly runs from a
+  // main-channel session while the user message originates in a thread.
+  const requesterThreadId =
+    (params.requesterThreadId != null && params.requesterThreadId !== ""
+      ? String(params.requesterThreadId)
+      : undefined) ??
+    (params.requesterSessionKey
+      ? parseThreadSessionSuffix(params.requesterSessionKey).threadId
+      : undefined);
   const fallbackThreadId =
+    requesterThreadId ??
     fallback?.threadId ??
     parseThreadSessionSuffix(params.sessionKey).threadId ??
     parseThreadSessionSuffix(params.displayKey).threadId;

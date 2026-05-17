@@ -37,6 +37,7 @@ export async function runSessionsSendA2AFlow(params: {
   maxPingPongTurns: number;
   requesterSessionKey?: string;
   requesterChannel?: GatewayMessageChannel;
+  requesterThreadId?: string | number;
   roundOneReply?: string;
   waitRunId?: string;
 }) {
@@ -64,6 +65,8 @@ export async function runSessionsSendA2AFlow(params: {
     const announceTarget = await resolveAnnounceTarget({
       sessionKey: params.targetSessionKey,
       displayKey: params.displayKey,
+      requesterSessionKey: params.requesterSessionKey,
+      requesterThreadId: params.requesterThreadId,
     });
     const targetChannel = announceTarget?.channel ?? "unknown";
 
