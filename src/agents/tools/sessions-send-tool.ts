@@ -184,6 +184,7 @@ async function startAgentRun(params: {
 export function createSessionsSendTool(opts?: {
   agentSessionKey?: string;
   agentChannel?: GatewayMessageChannel;
+  agentThreadId?: string | number;
   sandboxed?: boolean;
   config?: OpenClawConfig;
   callGateway?: GatewayCaller;
@@ -434,6 +435,7 @@ export function createSessionsSendTool(opts?: {
       };
       const requesterSessionKey = opts?.agentSessionKey;
       const requesterChannel = opts?.agentChannel;
+      const requesterThreadId = opts?.agentThreadId;
       const maxPingPongTurns = resolvePingPongTurns(cfg);
 
       // Skip the A2A ping-pong + announce flow when the current caller is the
@@ -485,6 +487,7 @@ export function createSessionsSendTool(opts?: {
           maxPingPongTurns,
           requesterSessionKey,
           requesterChannel,
+          requesterThreadId,
           baseline: baselineReply,
           roundOneReply,
           waitRunId,
